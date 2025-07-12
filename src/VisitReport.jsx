@@ -113,7 +113,7 @@ const VisitReport = () => {
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 py-8 px-4 sm:px-4 gap-8">
       <div className="flex justify-center items-center mb-6 w-full max-w-6xl mt-5">
-        <h2 className="text-2xl font-bold text-center">Visits Analysis</h2>
+        <h2 className="text-2xl font-bold text-center">{import.meta.env.VITE_FORM_HEADER}</h2>
       </div>
 
 
@@ -121,7 +121,7 @@ const VisitReport = () => {
         <select
           value={originFilter}
           onChange={e => setOriginFilter(e.target.value)}
-          className="px-3 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 hover:border-blue-400 bg-white"
+          className="h-8 px-6 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 hover:border-blue-400 bg-white"
         >
           <option value="">All Origins</option>
           {originOptions.map(opt => (
@@ -131,7 +131,7 @@ const VisitReport = () => {
         <select
           value={countryFilter}
           onChange={e => setCountryFilter(e.target.value)}
-          className="px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 hover:border-blue-400 bg-white"
+          className="h-8 px-6 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 hover:border-blue-400 bg-white"
         >
           <option value="">All Countries</option>
           {countryOptions.map(opt => (
@@ -141,7 +141,7 @@ const VisitReport = () => {
         <select
           value={regionFilter}
           onChange={e => setRegionFilter(e.target.value)}
-          className="px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 hover:border-blue-400 bg-white"
+          className="h-8 px-6 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 hover:border-blue-400 bg-white"
         >
           <option value="">All Regions</option>
           {regionOptions.map(opt => (
@@ -151,7 +151,7 @@ const VisitReport = () => {
         <select
           value={cityFilter}
           onChange={e => setCityFilter(e.target.value)}
-          className="px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 hover:border-blue-400 bg-white"
+          className="h-8 px-6 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 hover:border-blue-400 bg-white"
         >
           <option value="">All Cities</option>
           {cityOptions.map(opt => (
