@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import Login from './Login';
+import axios from 'axios';
+import { FiRefreshCw } from 'react-icons/fi';
 
 function parseDMYDate(dateStr) {
   if (!dateStr) return null;
@@ -19,6 +21,8 @@ const VisitReport = () => {
   const [cityFilter, setCityFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState('');
 
   const resetFilters = () => {
     setOriginFilter('');
@@ -65,6 +69,26 @@ const VisitReport = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const refreshData = async () => {
+    setRefreshing(true);
+    setRefreshError('');
+    try {
+      const credsRaw = localStorage.getItem('visitAppCredentials');
+      if (!credsRaw) throw new Error('No credentials found. Please log in again.');
+      const creds = JSON.parse(credsRaw);
+      if (!creds.username || !creds.password) throw new Error('Invalid credentials. Please log in again.');
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/find-visits`, {
+        username: creds.username,
+        password: creds.password
+      });
+      setVisits(response.data.visits);
+    } catch (err) {
+      setRefreshError('Failed to refresh data. Please try again.');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleLogout = () => {
@@ -168,16 +192,23 @@ const VisitReport = () => {
           Reset Filters
         </button>
 
-        <button
-          onClick={exportCSV}
-          className="w-full sm:w-[140px] h-[40px] px-4 py-1.5 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-all duration-200 shadow-md flex items-center justify-center"
-        >
-          Export as CSV
-        </button>
+        <div className="flex flex-col items-center gap-2">
+          <button
+            onClick={exportCSV}
+            className="w-full sm:w-[140px] h-[40px] px-4 py-1.5 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-all duration-200 shadow-md flex items-center justify-center"
+          >
+            Export as CSV
+          </button>
+        </div>
       </div>
+      {refreshError && (
+        <div className="text-red-500 text-sm mb-2 text-center">{refreshError}</div>
+      )}
 
 
-      <div className="overflow-x-auto w-full max-w-6xl">
+      <div className="overflow-x-auto w-full max-w-6xl relative">
+        {/* Refresh button at top right of table */}
+        {/* (Removed the old absolute-positioned button) */}
         <table className="min-w-full bg-white shadow-md rounded overflow-hidden">
           <thead>
             <tr className="bg-blue-100 text-left">
@@ -186,7 +217,20 @@ const VisitReport = () => {
               <th className="py-2 px-4">Region</th>
               <th className="py-2 px-4">City</th>
               <th className="py-2 px-4">Count</th>
-              <th className="py-2 px-4">Last Visit</th>
+              <th className="py-2 px-4 flex items-center justify-between gap-1">
+                <span>Last Visit</span>
+                <button
+                  onClick={refreshData}
+                  disabled={refreshing}
+                  aria-label="Refresh"
+                  title="Refresh"
+                  className={`ml-2 w-5 h-5 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow transition-all duration-200 border-none outline-none focus:ring-2 focus:ring-blue-400 ${refreshing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  style={{ fontSize: '12px', padding: '2px', marginRight: '25px' }}
+                >
+                  <FiRefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} style={{ width: '14px', height: '14px' }} />
+                  <span className="sr-only">Refresh</span>
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody>
