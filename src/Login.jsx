@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Input, Button, Card, CardContent, Progress } from "./ui";
 import { FaUser, FaLock } from 'react-icons/fa';
@@ -12,6 +12,23 @@ export default function Login({ setVisits }) {
     const [isLoading, setIsLoading] = useState(false);
     const [showValidation, setShowValidation] = useState(false);
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+        // Check for saved credentials in localStorage
+        const saved = localStorage.getItem('visitAppCredentials');
+        if (saved) {
+            try {
+                const creds = JSON.parse(saved);
+                if (creds.username && creds.password) {
+                    setFormData({ username: creds.username, password: creds.password });
+                    // Attempt auto-login
+                    handleSubmit({ preventDefault: () => {} }, creds);
+                }
+            } catch (e) {
+                
+            }
+        }
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -32,17 +49,27 @@ export default function Login({ setVisits }) {
             Object.keys(validate).length) *
         100;
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (isFormValid) {
-            console.log({ ...formData });
+    const handleSubmit = async (e, overrideData = null) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const dataToUse = overrideData || formData;
+        const valid = Object.values({
+            username: dataToUse.username.length >= 3,
+            password: dataToUse.password.trim().length >= 3,
+        }).every(Boolean);
+        if (valid) {
+            console.log({ ...dataToUse });
             try {
                 setIsLoading(true);
                 const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/find-visits`, {
-                    ...formData
+                    ...dataToUse
                 });
                 setVisits(response.data.visits);
                 setError('');
+                // Save credentials in localStorage
+                localStorage.setItem('visitAppCredentials', JSON.stringify({
+                    username: dataToUse.username,
+                    password: dataToUse.password
+                }));
             } catch (err) {
                 console.log(err);
                 setError('Invalid username or password');
@@ -50,6 +77,8 @@ export default function Login({ setVisits }) {
             } finally {
                 setIsLoading(false);
             }
+        } else {
+            setShowValidation(true);
         }
     };
 
